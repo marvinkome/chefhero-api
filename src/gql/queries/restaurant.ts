@@ -4,6 +4,7 @@ export const restaurantType = gql`
     type Restaurant {
         id: ID!
         name: String!
+        averageRatings: Int
     }
 `;
 

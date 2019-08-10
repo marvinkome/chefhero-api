@@ -5,6 +5,16 @@ export interface IUser extends Document {
     email: string;
     username: string;
     password: string;
+    location: string;
+    favourite_restaurants: any[];
+    cart: Array<{
+        food: any;
+        quantity: number;
+    }>;
+    orders: Array<{
+        date: Date;
+        meals: any[];
+    }>;
     verify_password: (password: string) => Promise<boolean>;
 }
 
@@ -24,7 +34,43 @@ export const userSchema: Schema<IUser> = new Schema({
     password: {
         type: String,
         required: true
-    }
+    },
+    location: {
+        type: String,
+        required: true
+    },
+    favourite_restaurants: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'restaurant'
+        }
+    ],
+    cart: [
+        {
+            food: {
+                type: Schema.Types.ObjectId,
+                ref: 'food'
+            },
+            quantity: {
+                type: Number,
+                default: 1
+            }
+        }
+    ],
+    orders: [
+        {
+            date: {
+                type: Date,
+                required: true
+            },
+            meals: [
+                {
+                    type: Schema.Types.ObjectId,
+                    ref: 'food'
+                }
+            ]
+        }
+    ]
 });
 
 userSchema.pre('save', async function(next) {
