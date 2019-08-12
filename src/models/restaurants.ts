@@ -49,4 +49,13 @@ export const restaurantSchema: Schema<IRestaurant> = new Schema({
     ]
 });
 
+restaurantSchema.index(
+    {
+        name: 'text'
+    },
+    {
+        weights: { name: 5 }
+    }
+);
+
 export default model<IRestaurant>('restaurant', restaurantSchema);

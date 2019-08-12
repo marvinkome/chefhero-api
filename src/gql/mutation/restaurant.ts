@@ -1,5 +1,4 @@
 import { authenticated } from '@libs/auth';
-import { IContext } from '@gql/index';
 import Restaurant from '@models/restaurants';
 
 export const typeDef = `
@@ -7,7 +6,7 @@ export const typeDef = `
     updateRestaurant(id: ID!, name: String): Restaurant
     deleteRestaurant(id: ID!): Boolean
     addSupportedLocations(id: ID!, location: String): Restaurant
-    addToFavourite(id: ID!): Boolean
+    searchRestaurant(keyword: String): [Restaurant]
 `;
 
 export const resolver = {
@@ -53,25 +52,7 @@ export const resolver = {
         return restaurant.save();
     }),
 
-    addToFavourite: authenticated(async (_: any, data: any, context: IContext) => {
-        const restaurant = await Restaurant.findById(data.id);
-        const user = context.currentUser;
-
-        if (!restaurant) {
-            throw Error('Restaurant not found');
-        }
-
-        if (!user) {
-            throw Error('User not found');
-        }
-
-        try {
-            user.favourite_restaurants.push(restaurant);
-            await user.save();
-            return true;
-        } catch (e) {
-            console.warn(e);
-            return false;
-        }
+    searchRestaurant: authenticated(async (_: any, data: any) => {
+        return await Restaurant.find({ $text: { $search: data.keyword } });
     })
 };
