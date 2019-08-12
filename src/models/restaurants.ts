@@ -3,6 +3,7 @@ import { Schema, model, Document } from 'mongoose';
 export interface IRestaurant extends Document {
     name: string;
     averageRatings?: number;
+    locations: string[];
     menus: Array<{
         start_date: string;
         end_date: string;
@@ -22,6 +23,12 @@ export const restaurantSchema: Schema<IRestaurant> = new Schema({
         max: 5,
         default: 0
     },
+    locations: [
+        {
+            type: String,
+            required: true
+        }
+    ],
     menus: [
         {
             start_date: {

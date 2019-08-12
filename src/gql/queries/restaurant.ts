@@ -8,9 +8,10 @@ export const restaurantType = gql`
     }
 
     type Restaurant {
-        id: ID!
-        name: String!
+        id: ID
+        name: String
         averageRatings: Int
+        locations: [String]
         menus: [Menu]
     }
 `;

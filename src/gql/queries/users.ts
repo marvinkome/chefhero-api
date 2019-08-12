@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-express';
+import { IUser } from '@models/users';
 
 export const userType = gql`
     type Cart {
@@ -16,12 +17,18 @@ export const userType = gql`
         username: String
         email: String
         location: String
-        favourite_restaurants: [Restaurant]
+        favouriteRestaurants: [Restaurant]
         cart: [Cart]
         orders: [Order]
     }
 `;
 
 export const userResolvers = {
-    User: {}
+    User: {
+        favouriteRestaurants: async (user: IUser) => {
+            const withFavRestaurant = await user.populate('favourite_restaurants').execPopulate();
+
+            return withFavRestaurant.favourite_restaurants;
+        }
+    }
 };
