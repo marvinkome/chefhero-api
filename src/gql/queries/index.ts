@@ -12,6 +12,8 @@ export const queryType = gql`
 
         favouriteRestaurants: [Restaurant]
         recommendedRestaurants: [Restaurant]
+
+        searchRestaurant(keyword: String): [Restaurant]
     }
 `;
 
@@ -50,6 +52,10 @@ export const queryResolver = {
             return await Restaurant.find({
                 locations: { $in: [userLocation] }
             });
+        }),
+
+        searchRestaurant: authenticated(async (_: any, data: any) => {
+            return await Restaurant.find({ $text: { $search: data.keyword } });
         })
     }
 };

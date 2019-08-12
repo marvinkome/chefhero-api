@@ -6,7 +6,6 @@ export const typeDef = `
     updateRestaurant(id: ID!, name: String): Restaurant
     deleteRestaurant(id: ID!): Boolean
     addSupportedLocations(id: ID!, location: String): Restaurant
-    searchRestaurant(keyword: String): [Restaurant]
 `;
 
 export const resolver = {
@@ -50,9 +49,5 @@ export const resolver = {
         // todo add validation
         restaurant.locations.push(location);
         return restaurant.save();
-    }),
-
-    searchRestaurant: authenticated(async (_: any, data: any) => {
-        return await Restaurant.find({ $text: { $search: data.keyword } });
     })
 };
