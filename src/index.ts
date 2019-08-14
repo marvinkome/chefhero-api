@@ -16,7 +16,8 @@ export default function createApp() {
         mongoUrl,
         {
             useNewUrlParser: true,
-            useCreateIndex: true
+            useCreateIndex: true,
+            useFindAndModify: false
         }
     );
 

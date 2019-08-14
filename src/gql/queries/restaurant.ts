@@ -3,6 +3,7 @@ import { IRestaurant } from '@models/restaurants';
 
 export const restaurantType = gql`
     type Menu {
+        id: ID
         start_date: String
         end_date: String
         foods: [Food]

@@ -1203,6 +1203,11 @@ module-alias@^2.2.0:
   resolved "https://registry.yarnpkg.com/module-alias/-/module-alias-2.2.0.tgz#a2e32275381642252bf0c51405f7a09a367479b5"
   integrity sha512-O4bbvlZkHj2LUQhieQWWCr486ddc8X+WwRqi3QGnFKfknaxdHTOB7+xRgeyWHc6arpjgtT5SLLMMTFwUM3/x5w==
 
+moment@^2.24.0:
+  version "2.24.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
+  integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
+
 mongodb-core@3.2.6:
   version "3.2.6"
   resolved "https://registry.yarnpkg.com/mongodb-core/-/mongodb-core-3.2.6.tgz#5522b721a744720a27a07b29177d10fe849ad20e"
