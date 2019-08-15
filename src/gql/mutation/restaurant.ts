@@ -1,15 +1,22 @@
 import moment from 'moment';
 import { authenticated } from '@libs/auth';
 import Restaurant from '@models/restaurants';
+import Food from '@models/foods';
 
 export const typeDef = `
+    """CUD for restaurants"""
     createRestaurant(name: String!): Restaurant
     updateRestaurant(id: ID!, name: String): Restaurant
     deleteRestaurant(id: ID!): Boolean
+
     addSupportedLocations(id: ID!, location: String): Restaurant
+
+    """CUD for menus"""
     createWeeklyMenu(id: ID!, startDate: String!, endDate: String!): Restaurant
     updateWeeklyMenu(menuId: ID!, startDate: String!, endDate: String!): Restaurant
     removeWeeklyMenu(id: ID!, menuId: ID!): Boolean
+
+    createFood(name: String!, price: Int!, day: String!, menuId: ID!): Restaurant
 `;
 
 export const resolver = {
@@ -64,8 +71,8 @@ export const resolver = {
         }
 
         restaurant.menus.push({
-            start_date: moment(data.startDate, 'DD-MM-YYYY').toString(),
-            end_date: moment(data.endDate, 'DD-MM-YYYY').toString(),
+            start_date: moment(data.startDate, 'DD-MM-YYYY').format('DD-MM-YYYY'),
+            end_date: moment(data.endDate, 'DD-MM-YYYY').format('DD-MM-YYYY'),
             foods: []
         });
 
@@ -77,11 +84,15 @@ export const resolver = {
         const update: any = {};
 
         if (updateData.startDate) {
-            update['menus.$.start_date'] = moment(updateData.startDate, 'DD-MM-YYYY').toString();
+            update['menus.$.start_date'] = moment(updateData.startDate, 'DD-MM-YYYY').format(
+                'DD-MM-YYYY'
+            );
         }
 
         if (updateData.endDate) {
-            update['menus.$.end_date'] = moment(updateData.endDate, 'DD-MM-YYYY').toString();
+            update['menus.$.end_date'] = moment(updateData.endDate, 'DD-MM-YYYY').format(
+                'DD-MM-YYYY'
+            );
         }
 
         const restaurant = await Restaurant.findOneAndUpdate(
@@ -108,5 +119,29 @@ export const resolver = {
         } catch (e) {
             throw Error(e);
         }
+    }),
+
+    createFood: authenticated(async (_: any, data) => {
+        // create food data
+        const food = new Food({
+            name: data.name,
+            price: data.price,
+            day: data.day
+        });
+
+        await food.save();
+
+        // add food to restaurant menu
+        const restaurant = await Restaurant.findOneAndUpdate(
+            { 'menus._id': data.menuId },
+            {
+                $push: {
+                    'menus.$.foods': food.id
+                }
+            },
+            { new: true }
+        );
+
+        return restaurant ? restaurant.populate('menus.foods').execPopulate() : null;
     })
 };

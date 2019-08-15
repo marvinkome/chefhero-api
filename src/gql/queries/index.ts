@@ -14,6 +14,8 @@ export const queryType = gql`
         recommendedRestaurants: [Restaurant]
 
         searchRestaurant(keyword: String): [Restaurant]
+
+        restaurant(id: ID!): Restaurant
     }
 `;
 
@@ -55,7 +57,11 @@ export const queryResolver = {
         }),
 
         searchRestaurant: authenticated(async (_: any, data: any) => {
-            return await Restaurant.find({ $text: { $search: data.keyword } });
+            return Restaurant.find({ $text: { $search: data.keyword } });
+        }),
+
+        restaurant: authenticated(async (_: any, data: any) => {
+            return Restaurant.findById(data.id).populate('menus.foods');
         })
     }
 };
