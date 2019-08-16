@@ -3,11 +3,13 @@ import { IUser } from '@models/users';
 
 export const userType = gql`
     type Cart {
+        id: ID
         food: Food
         quantity: Int
     }
 
     type Order {
+        id: ID
         date: String
         meals: [Food]
     }
@@ -29,6 +31,12 @@ export const userResolvers = {
             const withFavRestaurant = await user.populate('favourite_restaurants').execPopulate();
 
             return withFavRestaurant.favourite_restaurants;
+        },
+
+        cart: async (user: IUser) => {
+            const withCart = await user.populate('cart.food').execPopulate();
+
+            return withCart.cart;
         }
     }
 };

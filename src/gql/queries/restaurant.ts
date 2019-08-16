@@ -31,7 +31,8 @@ export const restaurantType = gql`
 
 export const restaurantResolvers = {
     Restaurant: {
-        priceRange: (restaurant: IRestaurant) => {
+        priceRange: async (restaurant: IRestaurant) => {
+            restaurant = await restaurant.populate('menus.foods').execPopulate();
             if (!restaurant.menus.length) {
                 return { min: 0, max: 0 };
             }
@@ -62,7 +63,8 @@ export const restaurantResolvers = {
             };
         },
 
-        activeMenu: (restaurant: IRestaurant) => {
+        activeMenu: async (restaurant: IRestaurant) => {
+            restaurant = await restaurant.populate('menus.foods').execPopulate();
             const activeMenu = restaurant.menus.filter((menu) => {
                 const startOfWeek = moment()
                     .startOf('isoWeek')
@@ -82,6 +84,10 @@ export const restaurantResolvers = {
             return !!user.favourite_restaurants.find((res: IRestaurant) => {
                 return `${res._id}` === `${restaurant._id}`;
             });
-        })
+        }),
+
+        menus: async (restaurant: IRestaurant) => {
+            return (await restaurant.populate('menus.foods').execPopulate()).menus;
+        }
     }
 };

@@ -106,19 +106,13 @@ export const resolver = {
 
     removeWeeklyMenu: authenticated(async (_: any, data: any) => {
         const { menuId, id } = data;
-        try {
-            await Restaurant.findByIdAndUpdate(
-                id,
-                {
-                    $pull: { menus: { _id: menuId } }
-                },
-                { new: true }
-            );
-
-            return true;
-        } catch (e) {
-            throw Error(e);
-        }
+        return Restaurant.findByIdAndUpdate(
+            id,
+            {
+                $pull: { menus: { _id: menuId } }
+            },
+            { new: true }
+        );
     }),
 
     createFood: authenticated(async (_: any, data) => {

@@ -61,7 +61,7 @@ export const queryResolver = {
         }),
 
         restaurant: authenticated(async (_: any, data: any) => {
-            return Restaurant.findById(data.id).populate('menus.foods');
+            return Restaurant.findById(data.id);
         })
     }
 };
