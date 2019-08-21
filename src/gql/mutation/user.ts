@@ -2,13 +2,15 @@ import { authenticated } from '@libs/auth';
 import { IContext } from '@gql/index';
 import User from '@models/users';
 import Restaurant from '@models/restaurants';
+import Food from '@models/foods';
 
 export const typeDef = `
     updateProfile(location: String, email: String): User
     addToFavourite(id: ID!): User
-    addToCart(foodId: ID!): User
-    updateItemInCart(cartId: ID!, quantity: Int): User
-    removeItemFromCart(cartId: ID!): User
+    addToCart(foodId: ID!): Cart
+    increaseCartItem(cartItemId: ID!): Cart
+    decreaseCartItem(cartItemId: ID!): Cart
+    removeCartItem(cartItemId: ID!): Cart
 `;
 
 export const resolver = {
@@ -58,47 +60,161 @@ export const resolver = {
             throw Error('User not found');
         }
 
-        user.cart.push({
-            food: data.foodId,
-            quantity: 1
-        });
-
-        return user.save();
-    }),
-
-    updateItemInCart: authenticated(async (_: any, data: any, context: IContext) => {
-        const user = context.currentUser;
-
-        if (!user) {
-            throw Error('User not found');
+        const food = await Food.findById(data.foodId);
+        if (!food) {
+            throw Error('Food not found');
         }
 
-        return await User.findOneAndUpdate(
-            { 'cart._id': data.cartId },
-            {
-                $set: {
-                    'cart.$.quantity': data.quantity
-                }
-            },
-            { new: true }
-        );
+        user.cart.items.push({
+            food: food.id,
+            quantity: 1
+        });
+        user.cart.totalAmount = (user.cart.totalAmount || 0) + food.price;
+
+        await user.save();
+        return (await user.populate('cart.items.food').execPopulate()).cart;
     }),
 
-    removeItemFromCart: authenticated(async (_: any, data: any, context: IContext) => {
+    increaseCartItem: authenticated(async (_: any, data: any, context: IContext) => {
         let user = context.currentUser;
 
         if (!user) {
             throw Error('User not found');
         }
 
-        user = await User.findByIdAndUpdate(
-            user.id,
+        // populate foods
+        user = await user.populate('cart.items.food').execPopulate();
+
+        // get cart items
+        const cartItem = user.cart.items.find((item) => {
+            return data.cartItemId === `${item.id}`;
+        });
+
+        if (!cartItem) {
+            throw Error('Cart item not found');
+        }
+
+        // increase item quantity
+        user = await User.findOneAndUpdate(
             {
-                $pull: { cart: { _id: data.cartId } }
+                'cart.items._id': data.cartItemId
+            },
+            {
+                $set: {
+                    'cart.totalAmount': (user.cart.totalAmount || 0) + cartItem.food.price
+                },
+                $inc: {
+                    'cart.items.$.quantity': 1
+                }
             },
             { new: true }
         );
 
-        return user;
+        if (!user) {
+            throw Error('User not found');
+        }
+
+        return (await user.populate('cart.items.food').execPopulate()).cart;
+    }),
+
+    decreaseCartItem: authenticated(async (_: any, data: any, context: IContext) => {
+        let user = context.currentUser;
+
+        if (!user) {
+            throw Error('User not found');
+        }
+
+        // populate foods
+        user = await user.populate('cart.items.food').execPopulate();
+
+        // get cart items
+        const cartItem = user.cart.items.find((item) => {
+            return data.cartItemId === `${item.id}`;
+        });
+
+        if (!cartItem) {
+            throw Error('Cart item not found');
+        }
+
+        const updateObj: any = {
+            $set: {
+                'cart.totalAmount': (user.cart.totalAmount || 0) - cartItem.food.price
+            }
+        };
+
+        if (cartItem.quantity === 1) {
+            // then fully remove item
+            updateObj.$pull = {
+                'cart.items': {
+                    _id: data.cartItemId
+                }
+            };
+        } else {
+            updateObj.$inc = {
+                'cart.items.$.quantity': -1
+            };
+        }
+
+        // increase item quantity
+        user = await User.findOneAndUpdate(
+            {
+                'cart.items._id': data.cartItemId
+            },
+            updateObj,
+            { new: true }
+        );
+
+        if (!user) {
+            throw Error('User not found');
+        }
+
+        return (await user.populate('cart.items.food').execPopulate()).cart;
+    }),
+
+    removeCartItem: authenticated(async (_: any, data: any, context: IContext) => {
+        let user = context.currentUser;
+
+        if (!user) {
+            throw Error('User not found');
+        }
+
+        // populate foods
+        user = await user.populate('cart.items.food').execPopulate();
+
+        // get cart items
+        const cartItem = user.cart.items.find((item) => {
+            return data.cartItemId === `${item.id}`;
+        });
+
+        if (!cartItem) {
+            throw Error('Cart item not found');
+        }
+
+        const totalPriceOfItem = cartItem.food.price * cartItem.quantity;
+
+        user = await User.findOneAndUpdate(
+            {
+                'cart.items._id': data.cartItemId
+            },
+            {
+                $set: {
+                    'cart.totalAmount': (user.cart.totalAmount || 0) - totalPriceOfItem
+                },
+                $pull: {
+                    'cart.items': {
+                        _id: data.cartItemId
+                    }
+                }
+            },
+            {
+                new: true
+            }
+        );
+
+        if (!user) {
+            throw Error('User not found');
+        }
+
+        return (await user.populate('cart.items.food').execPopulate()).cart;
     })
 };

@@ -11,13 +11,7 @@ import { foodType, foodResolvers } from './queries/food';
 
 const schema = makeExecutableSchema({
     typeDefs: [queryType, mutationType, userType, restaurantType, foodType],
-    resolvers: [
-        queryResolver,
-        mutationResolvers,
-        userResolvers,
-        restaurantResolvers,
-        foodResolvers
-    ]
+    resolvers: [queryResolver, mutationResolvers, userResolvers, restaurantResolvers, foodResolvers]
 });
 
 export interface IContext {
@@ -29,7 +23,7 @@ export default new ApolloServer({
     schema,
     context: async ({ req }): Promise<IContext> => {
         const authToken = getTokenFromHeaders(req);
-        let currentUser = null;
+        let currentUser: IUser | null = null;
 
         try {
             currentUser = await getUserFromToken(authToken || '');

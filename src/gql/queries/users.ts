@@ -2,10 +2,15 @@ import { gql } from 'apollo-server-express';
 import { IUser } from '@models/users';
 
 export const userType = gql`
-    type Cart {
+    type CartItem {
         id: ID
         food: Food
         quantity: Int
+    }
+
+    type Cart {
+        totalAmount: Int
+        items: [CartItem]
     }
 
     type Order {
@@ -20,7 +25,7 @@ export const userType = gql`
         email: String
         location: String
         favouriteRestaurants: [Restaurant]
-        cart: [Cart]
+        cart: Cart
         orders: [Order]
     }
 `;
@@ -34,7 +39,7 @@ export const userResolvers = {
         },
 
         cart: async (user: IUser) => {
-            const withCart = await user.populate('cart.food').execPopulate();
+            const withCart = await user.populate('cart.items.food').execPopulate();
 
             return withCart.cart;
         }

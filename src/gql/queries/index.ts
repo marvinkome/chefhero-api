@@ -12,10 +12,10 @@ export const queryType = gql`
 
         favouriteRestaurants: [Restaurant]
         recommendedRestaurants: [Restaurant]
-
         searchRestaurant(keyword: String): [Restaurant]
-
         restaurant(id: ID!): Restaurant
+
+        cart: Cart
     }
 `;
 
@@ -62,6 +62,15 @@ export const queryResolver = {
 
         restaurant: authenticated(async (_: any, data: any) => {
             return Restaurant.findById(data.id);
+        }),
+
+        cart: authenticated(async (_: any, __: any, context: IContext) => {
+            const user = context.currentUser;
+            if (!user) {
+                throw Error('User not found');
+            }
+
+            return (await user.populate('cart.food').execPopulate()).cart;
         })
     }
 };

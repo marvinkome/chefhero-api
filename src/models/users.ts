@@ -7,10 +7,14 @@ export interface IUser extends Document {
     password: string;
     location: string;
     favourite_restaurants: any[];
-    cart: Array<{
-        food: any;
-        quantity: number;
-    }>;
+    cart: {
+        totalAmount: number;
+        items: Array<{
+            id?: string;
+            food: any;
+            quantity: number;
+        }>;
+    };
     orders: Array<{
         date: Date;
         meals: any[];
@@ -45,18 +49,21 @@ export const userSchema: Schema<IUser> = new Schema({
             ref: 'restaurant'
         }
     ],
-    cart: [
-        {
-            food: {
-                type: Schema.Types.ObjectId,
-                ref: 'food'
-            },
-            quantity: {
-                type: Number,
-                default: 1
+    cart: {
+        totalAmount: Number,
+        items: [
+            {
+                food: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'food'
+                },
+                quantity: {
+                    type: Number,
+                    default: 1
+                }
             }
-        }
-    ],
+        ]
+    },
     orders: [
         {
             date: {
