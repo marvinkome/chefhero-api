@@ -49,7 +49,7 @@ export const userSchema: Schema<IUser> = new Schema({
             ref: 'restaurant'
         }
     ],
-    cart: {
+    cart: new Schema({
         totalAmount: Number,
         items: [
             {
@@ -63,7 +63,7 @@ export const userSchema: Schema<IUser> = new Schema({
                 }
             }
         ]
-    },
+    }),
     orders: [
         {
             date: {

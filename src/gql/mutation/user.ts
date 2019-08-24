@@ -65,11 +65,23 @@ export const resolver = {
             throw Error('Food not found');
         }
 
-        user.cart.items.push({
-            food: food.id,
-            quantity: 1
-        });
-        user.cart.totalAmount = (user.cart.totalAmount || 0) + food.price;
+        if (user.cart) {
+            user.cart.items.push({
+                food: food.id,
+                quantity: 1
+            });
+            user.cart.totalAmount = (user.cart.totalAmount || 0) + food.price;
+        } else {
+            user.cart = {
+                totalAmount: food.price,
+                items: [
+                    {
+                        food: food.id,
+                        quantity: 1
+                    }
+                ]
+            };
+        }
 
         await user.save();
         return (await user.populate('cart.items.food').execPopulate()).cart;

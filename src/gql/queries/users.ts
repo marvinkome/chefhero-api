@@ -9,6 +9,7 @@ export const userType = gql`
     }
 
     type Cart {
+        id: ID
         totalAmount: Int
         items: [CartItem]
     }

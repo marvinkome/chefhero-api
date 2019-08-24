@@ -70,7 +70,7 @@ export const queryResolver = {
                 throw Error('User not found');
             }
 
-            return (await user.populate('cart.food').execPopulate()).cart;
+            return (await user.populate('cart.items.food').execPopulate()).cart;
         })
     }
 };
