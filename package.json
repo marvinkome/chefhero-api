@@ -20,7 +20,7 @@
         "jsonwebtoken": "^8.5.1",
         "module-alias": "^2.2.0",
         "moment": "^2.24.0",
-        "mongoose": "^5.5.13",
+        "mongoose": "^5.7.5",
         "passport": "^0.4.0",
         "passport-local": "^1.0.0"
     },
